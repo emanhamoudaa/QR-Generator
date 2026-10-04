@@ -1,13 +1,14 @@
 import os
 import uuid
+import io
 import fitz  # PyMuPDF
 import qrcode
 from flask import Flask, render_template, request, send_from_directory
 
 app = Flask(__name__)
 
-# إعداد المجلدات
-UPLOAD_FOLDER = 'uploads'
+# إعداد مجلد الرفع
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -15,8 +16,8 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 DOMAIN_NAME = os.getenv('DOMAIN_NAME', 'https://eportal-fza.ae')
 
 
-def add_qr_to_pdf(input_pdf, output_pdf, qr_data):
-    # توليد صورة الـ QR Code
+def add_qr_to_pdf(input_pdf_path, output_pdf_path, qr_data):
+    # توليد صورة الـ QR Code في الذاكرة (Memory Buffer)
     qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -27,22 +28,21 @@ def add_qr_to_pdf(input_pdf, output_pdf, qr_data):
     qr.make(fit_size=True)
     img = qr.make_image(fill_color="black", back_color="white")
 
-    temp_qr_path = "temp_qr.png"
-    img.save(temp_qr_path)
+    # تحويل الصورة إلى bytes لعدم الحاجة لحفظ ملف مؤقت
+    img_byte_arr = io.BytesIO()
+    img.save(img_byte_arr, format='PNG')
+    img_bytes = img_byte_arr.getvalue()
 
-    # إضافة الـ QR إلى أعلى الصفحة الأولى في الـ PDF
-    doc = fitz.open(input_pdf)
+    # فتح الـ PDF وإضافة الـ QR
+    doc = fitz.open(input_pdf_path)
     page = doc[0]
 
-    # أبعاد وموقع الـ QR Code
+    # تحديد موقع وأبعاد الـ QR Code في الصفحة الأولى
     rect = fitz.Rect(450, 20, 550, 120)
-    page.insert_image(rect, filename=temp_qr_path)
+    page.insert_image(rect, stream=img_bytes)
 
-    doc.save(output_pdf)
+    doc.save(output_pdf_path)
     doc.close()
-
-    if os.path.exists(temp_qr_path):
-        os.remove(temp_qr_path)
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -59,13 +59,17 @@ def upload_file():
         temp_input_path = os.path.join(app.config['UPLOAD_FOLDER'], f"temp_{doc_id}.pdf")
         final_output_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{doc_id}.pdf")
 
+        # حفظ الملف المرفوع
         file.save(temp_input_path)
 
         view_url = f"{DOMAIN_NAME}/view/{doc_id}"
-        add_qr_to_pdf(temp_input_path, final_output_path, view_url)
 
-        if os.path.exists(temp_input_path):
-            os.remove(temp_input_path)
+        try:
+            add_qr_to_pdf(temp_input_path, final_output_path, view_url)
+        finally:
+            # حذف الملف المؤقت بعد المعالجة
+            if os.path.exists(temp_input_path):
+                os.remove(temp_input_path)
 
         return render_template('upload.html', doc_id=doc_id, view_url=view_url)
 
