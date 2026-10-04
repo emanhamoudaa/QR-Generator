@@ -1,5 +1,5 @@
 import os
-import pymupdf  # الاستدعاء المباشر والحديث للمكتبة
+import pymupdf  
 import qrcode
 from flask import Flask, request, render_template, send_from_directory
 
@@ -14,7 +14,6 @@ DOMAIN_NAME = "https://eportal-fza.ae"
 
 
 def add_qr_to_pdf(input_pdf_path, output_pdf_path, qr_data_url):
-    # إنشاء الـ QR Code
     qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -22,25 +21,21 @@ def add_qr_to_pdf(input_pdf_path, output_pdf_path, qr_data_url):
         border=2,
     )
     qr.add_data(qr_data_url)
-    qr.make(fit_size=True)
+    qr.make(fit=True)
     img = qr.make_image(fill_color="black", back_color="white")
     
-    # حفظ صورة الـ QR المؤقتة
     temp_qr_path = os.path.join(app.config['UPLOAD_FOLDER'], "temp_qr.png")
     img.save(temp_qr_path)
 
-    # فتح الـ PDF وتعديله بـ pymupdf
     doc = pymupdf.open(input_pdf_path)
-    page = doc[0]  # الصفحة الأولى
+    page = doc[0]
 
-    # أبعاد وموقع الـ QR Code (أعلى اليسار)
     rect = pymupdf.Rect(40, 40, 120, 120)
     page.insert_image(rect, filename=temp_qr_path)
 
     doc.save(output_pdf_path)
     doc.close()
 
-    # مسح الصورة المؤقتة
     if os.path.exists(temp_qr_path):
         os.remove(temp_qr_path)
 
