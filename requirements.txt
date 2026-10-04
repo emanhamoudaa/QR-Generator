@@ -3,3 +3,5 @@ gunicorn
 pymupdf
 qrcode
 Pillow
+opencv-python-headless
+numpy
