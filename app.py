@@ -6,10 +6,10 @@ from flask import Flask, request, render_template, send_from_directory
 
 app = Flask(__name__)
 
-# استخدام مجلد tmp الخص بالسيستم لتفادي صلاحيات Render
-UPLOAD_FOLDER = '/tmp/pdf_uploads'
+# تحديد مجلد الحفظ في المسار الرئيسي للبرنامج
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 DOMAIN_NAME = "https://eportal-fza.ae"
 
@@ -25,7 +25,7 @@ def add_qr_to_pdf(input_pdf_path, output_pdf_path, qr_data_url):
     qr.make(fit=True)
     img = qr.make_image(fill_color="black", back_color="white")
     
-    temp_qr_path = os.path.join(app.config['UPLOAD_FOLDER'], f"temp_{uuid.uuid4().hex}.png")
+    temp_qr_path = os.path.join(UPLOAD_FOLDER, f"temp_{uuid.uuid4().hex}.png")
     img.save(temp_qr_path)
 
     doc = pymupdf.open(input_pdf_path)
@@ -51,18 +51,17 @@ def upload_file():
                 return render_template('upload.html', error="يرجى اختيار ملف PDF أولاً")
 
             if file and file.filename.lower().endswith('.pdf'):
-                # اسم فريد وحصري ينتهي بـ .pdf لمنع أي مشاكل ترميز
-                file_id = uuid.uuid4().hex
-                filename = f"{file_id}.pdf"
+                # توليد معرف فريد للملف لتجنب مشاكل الأسماء والرموز
+                file_id = uuid.uuid4().hex[:10]
+                filename = f"doc_{file_id}.pdf"
                 
-                input_path = os.path.join(app.config['UPLOAD_FOLDER'], f"raw_{filename}")
-                output_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                input_path = os.path.join(UPLOAD_FOLDER, f"raw_{filename}")
+                output_path = os.path.join(UPLOAD_FOLDER, filename)
 
                 file.save(input_path)
 
-                # رابط فتح المعاينة ورابط الـ QR
+                # رابط المعاينة والـ QR
                 view_url = f"{DOMAIN_NAME}/view/{filename}"
-                
                 add_qr_to_pdf(input_path, output_path, view_url)
 
                 if os.path.exists(input_path):
@@ -80,7 +79,7 @@ def upload_file():
 
 @app.route('/view/')
 def view_pdf(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename, mimetype='application/pdf')
+    return send_from_directory(UPLOAD_FOLDER, filename, mimetype='application/pdf')
 
 
 if __name__ == '__main__':
