@@ -52,25 +52,26 @@ def upload_file():
                 return render_template('upload.html', error="يرجى اختيار ملف PDF أولاً")
 
             if file and file.filename.lower().endswith('.pdf'):
-                # تنظيف اسم الملف من المسافات والرموز لتجنب أخطاء 404
                 raw_filename = file.filename
                 safe_name = secure_filename(raw_filename)
                 
-                # إذا كان الاسم بالكامل يحتوي على رموز غير لاتينية وأصبح فارغاً
                 if not safe_name or not safe_name.endswith('.pdf'):
                     safe_name = f"doc_{os.urandom(4).hex()}.pdf"
 
+                # اسم الملف مع الـ QR
+                final_filename = f"qr_{safe_name}"
+
                 input_path = os.path.join(app.config['UPLOAD_FOLDER'], safe_name)
-                output_path = os.path.join(app.config['UPLOAD_FOLDER'], f"qr_{safe_name}")
+                output_path = os.path.join(app.config['UPLOAD_FOLDER'], final_filename)
 
                 file.save(input_path)
 
-                # إنشاء رابط للمعاينة مع الترميز الصحيح للـ URL
-                view_url = f"{DOMAIN_NAME}/view/{quote(safe_name)}"
+                # الرابط الذي سيتم تضمينه داخل الـ QR وتوجيه زر المعاينة إليه
+                view_url = f"{DOMAIN_NAME}/view/{final_filename}"
                 add_qr_to_pdf(input_path, output_path, view_url)
 
                 return render_template('upload.html', 
-                                       download_url=f"/uploads/qr_{safe_name}", 
+                                       download_url=f"/uploads/{final_filename}", 
                                        view_url=view_url)
 
         except Exception as e:
@@ -81,12 +82,12 @@ def upload_file():
 
 @app.route('/view/')
 def view_pdf(filename):
-    # إزالة أي ترميز مسافات (%20) للبحث عن اسم الملف الحقيقي
     safe_name = secure_filename(filename)
-    
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], f"qr_{safe_name}")
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], safe_name)
+
+    # إذا لم يجد الملف بالاسم المباشر، يبحث بإضافة qr_
     if not os.path.exists(file_path):
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], safe_name)
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], f"qr_{safe_name}")
 
     if os.path.exists(file_path):
         return send_from_directory(app.config['UPLOAD_FOLDER'], os.path.basename(file_path))
