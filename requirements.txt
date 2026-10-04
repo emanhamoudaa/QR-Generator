@@ -1,6 +1,5 @@
 Flask
-psycopg2-binary
+gunicorn
+pymupdf
 qrcode
 Pillow
-PyMuPDF
-gunicorn
