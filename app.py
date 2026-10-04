@@ -80,10 +80,10 @@ def upload_file():
 def view_pdf(filename):
     if not os.path.exists(os.path.join(UPLOAD_FOLDER, filename)):
         abort(404)
-    return render_template('view.html', pdf_url=f"/file/{filename}")
+    return render_template('view.html', doc_id=filename)
 
 
-@app.route('/file/<filename>')
+@app.route('/files/<filename>')
 def raw_pdf(filename):
     return send_from_directory(UPLOAD_FOLDER, filename, mimetype='application/pdf')
 
