@@ -45,10 +45,7 @@ def add_qr_to_pdf(input_pdf_path, output_pdf_path, qr_url):
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
-    # إذا كانت الصفحة بتفتح عادي (فتح جديد أو Reload)
-    if request.method == 'GET':
-        return render_template('upload.html', doc_id=None, view_url=None)
-    
+   
     # إذا تم الضغط على زر الرفع (POST)
     if request.method == 'POST':
         if 'pdf' not in request.files:
@@ -73,6 +70,9 @@ def upload_file():
             
         # فقط هنا بنبعت الـ doc_id و الـ view_url للملف
         return render_template('upload.html', doc_id=doc_id, view_url=view_url)
+
+else:
+    return render_template('upload.html', doc_id=None, view_url=None)
 
 @app.route('/view/<doc_id>')
 def view_document(doc_id):
