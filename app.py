@@ -2,8 +2,7 @@ import os
 import uuid
 import pymupdf
 import qrcode
-from flask import Flask, request, render_template, send_from_directory
-
+from flask import Flask, request, render_template, send_from_directory, abort
 app = Flask(__name__)
 
 # تحديد مجلد الحفظ في المسار الرئيسي للبرنامج
@@ -79,8 +78,14 @@ def upload_file():
 
 @app.route('/view/<filename>')
 def view_pdf(filename):
-    return send_from_directory(UPLOAD_FOLDER, filename, mimetype='application/pdf')
+    if not os.path.exists(os.path.join(UPLOAD_FOLDER, filename)):
+        abort(404)
+    return render_template('viewer.html', pdf_url=f"/file/{filename}")
 
+
+@app.route('/file/<filename>')
+def raw_pdf(filename):
+    return send_from_directory(UPLOAD_FOLDER, filename, mimetype='application/pdf')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
