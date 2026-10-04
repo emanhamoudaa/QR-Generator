@@ -77,7 +77,7 @@ def upload_file():
     return render_template('upload.html')
 
 
-@app.route('/view/')
+@app.route('/view/<filename>')
 def view_pdf(filename):
     return send_from_directory(UPLOAD_FOLDER, filename, mimetype='application/pdf')
 
