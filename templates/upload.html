@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رفع وتوليد QR المستندات</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
+        body { background-color: #f8fafc; color: #1e293b; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .card { background: #ffffff; width: 100%; max-width: 550px; border-radius: 16px; padding: 35px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0; text-align: center; }
+        h2 { font-size: 22px; margin-bottom: 8px; color: #0f172a; }
+        p { font-size: 14px; color: #64748b; margin-bottom: 25px; }
+        .drop-zone { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 35px 20px; background: #fafafa; cursor: pointer; position: relative; margin-bottom: 20px; transition: 0.2s; }
+        .drop-zone:hover { border-color: #2563eb; background: #f0f6ff; }
+        .drop-zone input[type="file"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+        .selected-file { margin-top: 10px; font-weight: 700; color: #16a34a; font-size: 13px; }
+        .btn-submit { width: 100%; padding: 12px; background: #2563eb; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .btn-submit:hover { background: #1d4ed8; }
+        .result-box { margin-top: 25px; padding: 20px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; text-align: right; font-size: 13px; }
+        .result-box a { color: #2563eb; font-weight: 700; word-break: break-all; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>لوحة رفع وتوليد QR المستندات</h2>
+        <p>ارفعي ملف PDF وسيتم طباعة الـ QR Code المباشر عليه تلقائياً</p>
+
+        <form action="/" method="post" enctype="multipart/form-data">
+            <div class="drop-zone">
+                <svg width="40" height="40" fill="none" stroke="#94a3b8" viewBox="0 0 24 24" style="margin-bottom: 10px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 0115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                <div>اضغطي لاختيار ملف الـ PDF</div>
+                <div class="selected-file" id="fileName"></div>
+                <input type="file" name="pdf" accept=".pdf" id="pdfInput" required>
+            </div>
+            <button type="submit" class="btn-submit">توليد الـ QR Code ودمجه</button>
+        </form>
+
+        {% if doc_id and view_url %}
+        <div class="result-box">
+            <div style="color: #16a34a; font-weight: 700; margin-bottom: 8px;">✓ تم دمج الـ QR Code بنجاح!</div>
+            <div><b>كود المستند:</b> <code>{{ doc_id }}</code></div>
+            <div style="margin-top: 5px;"><b>رابط المعاينة المستهدف:</b> <br><a href="/view/{{ doc_id }}" target="_blank">{{ view_url }}</a></div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        document.getElementById('pdfInput').addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                document.getElementById('fileName').innerText = "تم اختيار: " + e.target.files[0].name;
+            }
+        });
+    </script>
+</body>
+</html>
