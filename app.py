@@ -1,7 +1,10 @@
 import os
+import io
 import uuid
 import pymupdf
 import qrcode
+import cv2
+import numpy as np
 from flask import Flask, request, render_template, send_from_directory, abort
 app = Flask(__name__)
 
@@ -11,6 +14,28 @@ UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 DOMAIN_NAME = "https://eportal-fza.ae"
+
+def remove_existing_qr(page):
+    """يدوّر على أي QR في الصفحة ويمسحه."""
+    zoom = 2
+    pix = page.get_pixmap(matrix=pymupdf.Matrix(zoom, zoom), alpha=False)
+    img = np.frombuffer(pix.samples, dtype=np.uint8).reshape(pix.height, pix.width, 3)
+    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+
+    detector = cv2.QRCodeDetector()
+    found, points = detector.detectMulti(img)
+    if not found or points is None:
+        return
+
+    for quad in points:
+        xs = quad[:, 0] / zoom
+        ys = quad[:, 1] / zoom
+        pad = 6  # هامش صغير حوالين الـ QR القديم
+        rect = pymupdf.Rect(xs.min() - pad, ys.min() - pad,
+                            xs.max() + pad, ys.max() + pad)
+        page.add_redact_annot(rect, fill=(1, 1, 1))
+
+    page.apply_redactions(images=pymupdf.PDF_REDACT_IMAGE_PIXELS)
 
 
 def add_qr_to_pdf(input_pdf_path, output_pdf_path, qr_data_url):
@@ -23,21 +48,31 @@ def add_qr_to_pdf(input_pdf_path, output_pdf_path, qr_data_url):
     qr.add_data(qr_data_url)
     qr.make(fit=True)
     img = qr.make_image(fill_color="black", back_color="white")
-    
-    temp_qr_path = os.path.join(UPLOAD_FOLDER, f"temp_{uuid.uuid4().hex}.png")
-    img.save(temp_qr_path)
+
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    qr_bytes = buf.getvalue()
 
     doc = pymupdf.open(input_pdf_path)
-    page = doc[0]
 
-    rect = pymupdf.Rect(40, 40, 120, 120)
-    page.insert_image(rect, filename=temp_qr_path)
+    qr_size = 70   # حجم الـ QR
+    margin = 20    # المسافة من حافة الصفحة
+
+    for page in doc:
+        # 1) امسحي أي QR قديم
+        remove_existing_qr(page)
+
+        # 2) حطي الجديد تحت يمين
+        r = page.rect
+        rect = pymupdf.Rect(r.x1 - margin - qr_size, r.y1 - margin - qr_size,
+                            r.x1 - margin, r.y1 - margin)
+        page.insert_image(rect, stream=qr_bytes)
 
     doc.save(output_pdf_path)
     doc.close()
 
-    if os.path.exists(temp_qr_path):
-        os.remove(temp_qr_path)
+
+   
 
 
 @app.route('/', methods=['GET', 'POST'])
