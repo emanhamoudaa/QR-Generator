@@ -1,14 +1,14 @@
 import os
+import uuid
 import pymupdf
 import qrcode
-from urllib.parse import quote
-from werkzeug.utils import secure_filename
 from flask import Flask, request, render_template, send_from_directory
 
 app = Flask(__name__)
 
-# إعداد مجلد الحفظ
-UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
+# مجلد الحفظ المباشر
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -16,6 +16,7 @@ DOMAIN_NAME = "https://eportal-fza.ae"
 
 
 def add_qr_to_pdf(input_pdf_path, output_pdf_path, qr_data_url):
+    # إنشاء الـ QR Code
     qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -26,18 +27,21 @@ def add_qr_to_pdf(input_pdf_path, output_pdf_path, qr_data_url):
     qr.make(fit=True)
     img = qr.make_image(fill_color="black", back_color="white")
     
-    temp_qr_path = os.path.join(app.config['UPLOAD_FOLDER'], "temp_qr.png")
+    temp_qr_path = os.path.join(app.config['UPLOAD_FOLDER'], f"temp_{uuid.uuid4().hex}.png")
     img.save(temp_qr_path)
 
+    # فتح الـ PDF وتعديله
     doc = pymupdf.open(input_pdf_path)
-    page = doc[0]
+    page = doc[0]  # الصفحة الأولى
 
+    # أبعاد وموقع الـ QR Code (أعلى اليسار)
     rect = pymupdf.Rect(40, 40, 120, 120)
     page.insert_image(rect, filename=temp_qr_path)
 
     doc.save(output_pdf_path)
     doc.close()
 
+    # حذف الصورة المؤقتة للـ QR
     if os.path.exists(temp_qr_path):
         os.remove(temp_qr_path)
 
@@ -52,26 +56,27 @@ def upload_file():
                 return render_template('upload.html', error="يرجى اختيار ملف PDF أولاً")
 
             if file and file.filename.lower().endswith('.pdf'):
-                raw_filename = file.filename
-                safe_name = secure_filename(raw_filename)
+                # توليد معرف فريد ثابت للملف لتجنب مشاكل المسافات والأحرف العربية والـ 404
+                file_id = uuid.uuid4().hex[:10]
+                filename = f"doc_{file_id}.pdf"
                 
-                if not safe_name or not safe_name.endswith('.pdf'):
-                    safe_name = f"doc_{os.urandom(4).hex()}.pdf"
-
-                # اسم الملف مع الـ QR
-                final_filename = f"qr_{safe_name}"
-
-                input_path = os.path.join(app.config['UPLOAD_FOLDER'], safe_name)
-                output_path = os.path.join(app.config['UPLOAD_FOLDER'], final_filename)
+                input_path = os.path.join(app.config['UPLOAD_FOLDER'], f"raw_{filename}")
+                output_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
                 file.save(input_path)
 
-                # الرابط الذي سيتم تضمينه داخل الـ QR وتوجيه زر المعاينة إليه
-                view_url = f"{DOMAIN_NAME}/view/{final_filename}"
+                # الرابط الذي سيتم فتحه عند مسح الـ QR أو عند الضغط على معاينة
+                view_url = f"{DOMAIN_NAME}/view/{filename}"
+                
+                # إضافة الـ QR وبناء الملف النهائي
                 add_qr_to_pdf(input_path, output_path, view_url)
 
+                # حذف الملف الخام الأصلي للترتيب
+                if os.path.exists(input_path):
+                    os.remove(input_path)
+
                 return render_template('upload.html', 
-                                       download_url=f"/uploads/{final_filename}", 
+                                       download_url=f"/uploads/{filename}", 
                                        view_url=view_url)
 
         except Exception as e:
@@ -82,23 +87,16 @@ def upload_file():
 
 @app.route('/view/')
 def view_pdf(filename):
-    safe_name = secure_filename(filename)
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], safe_name)
-
-    # إذا لم يجد الملف بالاسم المباشر، يبحث بإضافة qr_
-    if not os.path.exists(file_path):
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], f"qr_{safe_name}")
-
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     if os.path.exists(file_path):
-        return send_from_directory(app.config['UPLOAD_FOLDER'], os.path.basename(file_path))
+        return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
     else:
-        return f"الملف غير موجود: {safe_name}", 404
+        return f"عذراً، الملف غير موجود أو انتهت صلاحية الجلسة: {filename}", 404
 
 
 @app.route('/uploads/')
 def download_file(filename):
-    safe_name = secure_filename(filename)
-    return send_from_directory(app.config['UPLOAD_FOLDER'], safe_name)
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename, as_attachment=True)
 
 
 if __name__ == '__main__':
