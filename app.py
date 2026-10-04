@@ -80,7 +80,7 @@ def upload_file():
 def view_pdf(filename):
     if not os.path.exists(os.path.join(UPLOAD_FOLDER, filename)):
         abort(404)
-    return render_template('viewer.html', pdf_url=f"/file/{filename}")
+    return render_template('view.html', pdf_url=f"/file/{filename}")
 
 
 @app.route('/file/<filename>')
