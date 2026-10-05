@@ -16,9 +16,14 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 DOMAIN_NAME = "https://eportal-fza.ae"
 
 def remove_existing_qr(page):
-    """يدوّر على أي QR في الصفحة ويمسحه."""
+    """يدوّر على أي QR في الجزء اليمين من الصفحة بس ويمسحه."""
     zoom = 2
-    pix = page.get_pixmap(matrix=pymupdf.Matrix(zoom, zoom), alpha=False)
+    r = page.rect
+
+    # الجزء اللي هيتفحص: من منتصف الصفحة لحد الحافة اليمين
+    clip = pymupdf.Rect(r.x0 + r.width * 0.5, r.y0, r.x1, r.y1)
+
+    pix = page.get_pixmap(matrix=pymupdf.Matrix(zoom, zoom), clip=clip, alpha=False)
     img = np.frombuffer(pix.samples, dtype=np.uint8).reshape(pix.height, pix.width, 3)
     img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
@@ -28,9 +33,10 @@ def remove_existing_qr(page):
         return
 
     for quad in points:
-        xs = quad[:, 0] / zoom
-        ys = quad[:, 1] / zoom
-        pad = 6  # هامش صغير حوالين الـ QR القديم
+        # نرجّع الإحداثيات لمكانها الأصلي في الصفحة (نضيف إزاحة الـ clip)
+        xs = quad[:, 0] / zoom + clip.x0
+        ys = quad[:, 1] / zoom + clip.y0
+        pad = 6
         rect = pymupdf.Rect(xs.min() - pad, ys.min() - pad,
                             xs.max() + pad, ys.max() + pad)
         page.add_redact_annot(rect, fill=(1, 1, 1))
