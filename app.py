@@ -98,9 +98,9 @@ def add_qr_to_pdf(input_pdf_path, output_pdf_path, qr_data_url):
 
     doc = pymupdf.open(input_pdf_path)
 
-    qr_size = 70   # حجم الـ QR
-    margin = 20    # المسافة من حافة الصفحة
-
+    qr_size = 63     # يطابق حجم الباركود الشمال تقريباً
+    margin_x = 45    # المسافة من الحافة اليمين
+    margin_y = 58    # المسافة من الحافة تحت
     for page in doc:
         # 1) امسحي أي QR قديم
         remove_existing_qr(page)
