@@ -21,19 +21,25 @@
             flex-direction: column;
         }
 
-        /* 1. الشريط العلوي الرئيسي (Verify Document) */
+        /* 1. الشريط العلوي الرئيسي (مفصول ونازل لتحت بنفس شكل الصورة) */
+        .top-bar-container {
+            padding: 12px 16px 8px 16px;
+            background-color: #ffffff;
+        }
+
         .top-bar {
-            background-color: #212529;
-            padding: 10px 16px;
+            background-color: #1e1e1e;
+            padding: 12px 16px;
             font-size: 15px;
             font-weight: 600;
             color: #ffffff;
+            border-radius: 4px;
         }
 
-        /* 2. منطقة البحث والمدخلات (خلفية بيضاء بدلاً من الداكنة) */
+        /* 2. منطقة البحث والمدخلات */
         .search-section {
             background-color: #ffffff;
-            padding: 16px;
+            padding: 8px 16px 16px 16px;
         }
 
         .input-label {
@@ -53,7 +59,7 @@
             border-radius: 4px;
             outline: none;
             margin-bottom: 16px;
-            font-family: inherit;
+            font-family: monospace;
         }
 
         .document-input:focus {
@@ -61,7 +67,7 @@
             box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
         }
 
-        /* 3. شريط أزرار التحكم (Search / Download) بالتساوي 50% / 50% */
+        /* 3. شريط أزرار التحكم (Search / Download) */
         .buttons-group {
             display: flex;
             gap: 12px;
@@ -71,7 +77,7 @@
         .btn-search, .btn-download {
             flex: 1;
             padding: 10px;
-            background-color: #212529;
+            background-color: #1e1e1e;
             color: #ffffff;
             border: none;
             font-weight: 500;
@@ -87,7 +93,77 @@
             background-color: #343a40;
         }
 
-        /* 4. منطقة عرض الـ PDF المرفوع */
+        /* 4. شريط أدوات عارض الـ PDF (الخاص بالـ Zoom والتنقل) */
+        .pdf-toolbar {
+            background-color: #323639;
+            color: #f1f3f4;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+            border-bottom: 1px solid #202124;
+            user-select: none;
+        }
+
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .toolbar-btn {
+            background: transparent;
+            border: none;
+            color: #f1f3f4;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toolbar-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .page-num-input {
+            width: 32px;
+            text-align: center;
+            background-color: #202124;
+            border: 1px solid #5f6368;
+            color: #ffffff;
+            border-radius: 2px;
+            padding: 2px 0;
+            font-size: 12px;
+            outline: none;
+        }
+
+        .zoom-select {
+            background-color: #202124;
+            color: #ffffff;
+            border: 1px solid #5f6368;
+            padding: 3px 8px;
+            border-radius: 2px;
+            font-size: 12px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .toolbar-icon {
+            font-size: 14px;
+            opacity: 0.85;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .toolbar-icon:hover {
+            opacity: 1;
+        }
+
+        /* 5. منطقة عرض المستند الرمادية الداكنة */
         .viewer-container {
             flex: 1;
             width: 100%;
@@ -108,14 +184,14 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
-            padding: 10px;
+            gap: 15px;
+            padding: 20px 10px;
         }
 
         #pages canvas {
             background: #fff;
             max-width: 100%;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
         }
 
         #msg {
@@ -128,12 +204,14 @@
 </head>
 <body>
 
-    <!-- الهيدر العلوي -->
-    <div class="top-bar">
-        Verify Document
+    <!-- 1. الهيدر العلوي (نازل ومفصول بمسافة مثل الصورة) -->
+    <div class="top-bar-container">
+        <div class="top-bar">
+            Verify Document
+        </div>
     </div>
 
-    <!-- لوحة البحث والتحكم -->
+    <!-- 2. لوحة البحث والتحكم -->
     <div class="search-section">
         <span class="input-label">Enter Document Number</span>
         <input type="text" id="docInput" class="document-input" value="{{ doc_id }}">
@@ -144,7 +222,36 @@
         </div>
     </div>
 
-    <!-- حاوية عرض الـ PDF -->
+    <!-- 3. شريط الـ Zoom والتنقل (PDF Toolbar) -->
+    <div class="pdf-toolbar">
+        <div class="toolbar-group">
+            <button class="toolbar-btn" title="Previous Page">‹</button>
+            <button class="toolbar-btn" title="Next Page">›</button>
+            <input type="text" class="page-num-input" value="1">
+            <span style="color: #bdc1c6;">of <span id="totalPagesCount">2</span></span>
+            <span style="color: #5f6368; margin: 0 4px;">|</span>
+            <button class="toolbar-btn" title="Zoom Out">−</button>
+            <button class="toolbar-btn" title="Zoom In">+</button>
+            <select class="zoom-select">
+                <option>Automatic Zoom</option>
+                <option>Actual Size</option>
+                <option>Page Fit</option>
+                <option>50%</option>
+                <option>75%</option>
+                <option>100%</option>
+                <option>125%</option>
+                <option>150%</option>
+            </select>
+        </div>
+        <div class="toolbar-group">
+            <span class="toolbar-icon" title="Print">🖨️</span>
+            <span class="toolbar-icon" title="Download">📥</span>
+            <span class="toolbar-icon" title="Bookmark">🔖</span>
+            <span class="toolbar-icon" title="More Options">⋮</span>
+        </div>
+    </div>
+
+    <!-- 4. حاوية عرض الـ PDF -->
     <div class="viewer-container" id="viewer">
         <div id="msg">جاري تحميل الملف...</div>
         <div id="pages"></div>
@@ -176,6 +283,7 @@
 
             pdfjsLib.getDocument(url).promise.then(async (pdf) => {
                 msg.remove();
+                document.getElementById('totalPagesCount').textContent = pdf.numPages;
                 const cssWidth = viewer.clientWidth - 20;
                 const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
