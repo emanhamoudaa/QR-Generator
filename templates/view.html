@@ -62,7 +62,7 @@
             font-family: monospace;
         }
 
-        /* 3. أزرار البحث والتنزيل متطابقة ومتساوية تماماً */
+        /* 3. أزرار البحث والتنزيل */
         .buttons-group {
             display: flex;
             gap: 12px;
@@ -88,7 +88,17 @@
             background-color: #343a40;
         }
 
-        /* 4. شريط أدوات عارض الـ PDF */
+        /* 4. الحاوية الخارجية لإعطاء المسافة البيضاء الجانبية للـ PDF بنفس موازاة الأزرار */
+        .outer-pdf-wrapper {
+            flex: 1;
+            padding: 0 16px 16px 16px; /* مسافة بيضاء من الشمال واليمين والأسفل لتكون بموازاة الأزرار */
+            background-color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* 5. شريط أدوات عارض الـ PDF الداكن */
         .pdf-toolbar {
             background-color: #323639;
             color: #ffffff;
@@ -98,6 +108,8 @@
             justify-content: space-between;
             font-size: 13px;
             border-bottom: 1px solid #202124;
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
             user-select: none;
             direction: ltr;
         }
@@ -171,7 +183,7 @@
             padding: 2px 4px;
         }
 
-        /* 5. حاوية عرض الـ PDF كاملة العرض بدون مسافات بيضاء خارجية */
+        /* 6. منطقة عرض الـ PDF المفصلة بالداخل */
         .viewer-container {
             flex: 1;
             width: 100%;
@@ -179,21 +191,24 @@
             position: relative;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
-            padding: 12px 10px;
+            padding: 12px 8px;
+            border-bottom-left-radius: 4px;
+            border-bottom-right-radius: 4px;
+            direction: ltr; /* الـ Slider هيكون على الشمال */
         }
 
-        /* شريط التمرير الأسود المحاذي لليسار */
+        /* تخصيص الـ Slider الأسود وتثبيته على الجانب الأيسر */
         .viewer-container::-webkit-scrollbar {
-            width: 6px;
+            width: 8px;
         }
 
         .viewer-container::-webkit-scrollbar-track {
-            background: #2b2e31;
+            background: #323639;
         }
 
         .viewer-container::-webkit-scrollbar-thumb {
             background: #111111;
-            border-radius: 3px;
+            border-radius: 4px;
         }
 
         iframe {
@@ -246,41 +261,45 @@
         </div>
     </div>
 
-    <!-- 3. شريط عارض الـ PDF الداكن -->
-    <div class="pdf-toolbar">
-        <div class="toolbar-left">
-            <button class="toolbar-btn" title="Previous Page">‹</button>
-            <button class="toolbar-btn" title="Next Page">›</button>
-            
-            <div class="page-control-box">
-                <input type="text" class="page-num-input" value="1">
-                <span class="page-count-text">of <span id="totalPagesCount">2</span></span>
-            </div>
-
-            <span style="color: #5f6368; margin: 0 2px;">|</span>
-            <button class="toolbar-btn" title="Zoom Out">−</button>
-            <button class="toolbar-btn" title="Zoom In">+</button>
-            
-            <select class="zoom-select">
-                <option>Automatic Zoom</option>
-                <option>Actual Size</option>
-                <option>Page Fit</option>
-                <option>50%</option>
-                <option>75%</option>
-                <option>100%</option>
-            </select>
-        </div>
+    <!-- 3. الحاوية المغلفة للـ PDF لمنح المسافة البيضاء الخارجية بموازاة الأزرار -->
+    <div class="outer-pdf-wrapper">
         
-        <!-- أيقونة الطباعة يمين الشريط -->
-        <div>
-            <button class="print-btn" title="Print">🖨️</button>
-        </div>
-    </div>
+        <!-- شريط أدوات الـ PDF الداكن -->
+        <div class="pdf-toolbar">
+            <div class="toolbar-left">
+                <button class="toolbar-btn" title="Previous Page">‹</button>
+                <button class="toolbar-btn" title="Next Page">›</button>
+                
+                <div class="page-control-box">
+                    <input type="text" class="page-num-input" value="1">
+                    <span class="page-count-text">of <span id="totalPagesCount">2</span></span>
+                </div>
 
-    <!-- 4. منطقة عارض الـ PDF -->
-    <div class="viewer-container" id="viewer">
-        <div id="msg">جاري تحميل الملف...</div>
-        <div id="pages"></div>
+                <span style="color: #5f6368; margin: 0 2px;">|</span>
+                <button class="toolbar-btn" title="Zoom Out">−</button>
+                <button class="toolbar-btn" title="Zoom In">+</button>
+                
+                <select class="zoom-select">
+                    <option>Automatic Zoom</option>
+                    <option>Actual Size</option>
+                    <option>Page Fit</option>
+                    <option>50%</option>
+                    <option>75%</option>
+                    <option>100%</option>
+                </select>
+            </div>
+            
+            <div>
+                <button class="print-btn" title="Print">🖨️</button>
+            </div>
+        </div>
+
+        <!-- منطقة عارض الـ PDF -->
+        <div class="viewer-container" id="viewer">
+            <div id="msg">جاري تحميل الملف...</div>
+            <div id="pages"></div>
+        </div>
+
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -308,7 +327,7 @@
             pdfjsLib.getDocument(url).promise.then(async (pdf) => {
                 msg.remove();
                 document.getElementById('totalPagesCount').textContent = pdf.numPages;
-                const cssWidth = viewer.clientWidth - 20;
+                const cssWidth = viewer.clientWidth - 16;
                 const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
                 for (let i = 1; i <= pdf.numPages; i++) {
