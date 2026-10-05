@@ -106,18 +106,41 @@
 
         /* 4. منطقة عرض الـ PDF المرفوع */
         .viewer-container {
-            flex: 1;
-            width: 100%;
-            background-color: #323639;
-            position: relative;
-        }
+    flex: 1;
+    width: 100%;
+    background-color: #323639;
+    position: relative;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
 
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            display: block;
-        }
+iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+}
+
+#pages {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+}
+
+#pages canvas {
+    background: #fff;
+    max-width: 100%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+#msg {
+    text-align: center;
+    padding: 24px;
+    color: #cfd3d7;
+    font-size: 14px;
+}
     </style>
 </head>
 <body>
