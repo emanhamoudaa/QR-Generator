@@ -21,7 +21,7 @@
             flex-direction: column;
         }
 
-        /* 1. الشريط العلوي الرئيسي (مفصول ونازل لتحت بنفس شكل الصورة) */
+        /* 1. الشريط العلوي الرئيسي */
         .top-bar-container {
             padding: 12px 16px 8px 16px;
             background-color: #ffffff;
@@ -67,7 +67,7 @@
             box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
         }
 
-        /* 3. شريط أزرار التحكم (Search / Download) */
+        /* 3. شريط أزرار التحكم */
         .buttons-group {
             display: flex;
             gap: 12px;
@@ -93,23 +93,34 @@
             background-color: #343a40;
         }
 
-        /* 4. شريط أدوات عارض الـ PDF (الخاص بالـ Zoom والتنقل) */
+        /* 4. شريط أدوات الـ PDF (معدل لمنع نزول of 2) */
         .pdf-toolbar {
             background-color: #323639;
             color: #f1f3f4;
-            padding: 8px 16px;
+            padding: 8px 12px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             font-size: 13px;
             border-bottom: 1px solid #202124;
             user-select: none;
+            overflow-x: auto; /* يسمح بالتمرير الأفقي إذا كانت الشاشة صغيرة جداً */
+            white-space: nowrap; /* يمنع أي عنصر من النزول لسطر جديد */
+            direction: ltr; /* يضمن الترتيب من اليسار لليمين دائماً */
         }
 
         .toolbar-group {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
+            flex-wrap: nowrap;
+        }
+
+        .page-control-box {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
         }
 
         .toolbar-btn {
@@ -141,11 +152,17 @@
             outline: none;
         }
 
+        .page-count-text {
+            color: #bdc1c6;
+            white-space: nowrap;
+            font-size: 12px;
+        }
+
         .zoom-select {
             background-color: #202124;
             color: #ffffff;
             border: 1px solid #5f6368;
-            padding: 3px 8px;
+            padding: 3px 6px;
             border-radius: 2px;
             font-size: 12px;
             outline: none;
@@ -159,11 +176,7 @@
             padding: 4px;
         }
 
-        .toolbar-icon:hover {
-            opacity: 1;
-        }
-
-        /* 5. منطقة عرض المستند الرمادية الداكنة */
+        /* 5. منطقة عرض المستند */
         .viewer-container {
             flex: 1;
             width: 100%;
@@ -204,7 +217,7 @@
 </head>
 <body>
 
-    <!-- 1. الهيدر العلوي (نازل ومفصول بمسافة مثل الصورة) -->
+    <!-- 1. الهيدر العلوي -->
     <div class="top-bar-container">
         <div class="top-bar">
             Verify Document
@@ -222,14 +235,19 @@
         </div>
     </div>
 
-    <!-- 3. شريط الـ Zoom والتنقل (PDF Toolbar) -->
+    <!-- 3. شريط الـ PDF المعدل -->
     <div class="pdf-toolbar">
         <div class="toolbar-group">
             <button class="toolbar-btn" title="Previous Page">‹</button>
             <button class="toolbar-btn" title="Next Page">›</button>
-            <input type="text" class="page-num-input" value="1">
-            <span style="color: #bdc1c6;">of <span id="totalPagesCount">2</span></span>
-            <span style="color: #5f6368; margin: 0 4px;">|</span>
+            
+            <!-- تجمِيع الـ input مع الكلمة للثبات بنفس السطر -->
+            <div class="page-control-box">
+                <input type="text" class="page-num-input" value="1">
+                <span class="page-count-text">of <span id="totalPagesCount">2</span></span>
+            </div>
+
+            <span style="color: #5f6368; margin: 0 2px;">|</span>
             <button class="toolbar-btn" title="Zoom Out">−</button>
             <button class="toolbar-btn" title="Zoom In">+</button>
             <select class="zoom-select">
@@ -239,15 +257,7 @@
                 <option>50%</option>
                 <option>75%</option>
                 <option>100%</option>
-                <option>125%</option>
-                <option>150%</option>
             </select>
-        </div>
-        <div class="toolbar-group">
-            <span class="toolbar-icon" title="Print">🖨️</span>
-            <span class="toolbar-icon" title="Download">📥</span>
-            <span class="toolbar-icon" title="Bookmark">🔖</span>
-            <span class="toolbar-icon" title="More Options">⋮</span>
         </div>
     </div>
 
@@ -271,10 +281,8 @@
         const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
         if (!isMobile) {
-            // اللاب: عارض Chrome الجاهز
             viewer.innerHTML = '<iframe src="' + url + '#toolbar=1&navpanes=0&scrollbar=1"></iframe>';
         } else {
-            // الموبايل: نرسم الصفحات بـ PDF.js
             pdfjsLib.GlobalWorkerOptions.workerSrc =
                 "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
