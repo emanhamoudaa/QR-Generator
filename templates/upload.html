@@ -93,7 +93,7 @@
 
 <div class="card">
     <h2>لوحة رفع وتوليد QR المستندات</h2>
-    <p>ارفعي ملف PDF وسيتم إضافة الـ QR Code المباشر عليه تلقائياً</p>
+    <p>ارفع ملف PDF وسيتم إضافة الـ QR Code المباشر عليه تلقائياً</p>
 
     {% if error %}
         <div class="error-box">{{ error }}</div>
@@ -102,7 +102,7 @@
     <form action="/" method="post" enctype="multipart/form-data">
         <div class="drop-zone">
             <svg width="40" height="40" fill="none" stroke="#94a3b8" viewBox="0 0 24 24" style="margin-bottom: 10px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 0115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-            <div>اضغطي لاختيار ملف الـ PDF</div>
+            <div>اضغط لاختيار ملف الـ PDF</div>
             <div class="selected-file" id="fileName"></div>
             <input type="file" name="pdf" accept=".pdf" id="pdfInput" required onchange="showFileName(this)">
         </div>
