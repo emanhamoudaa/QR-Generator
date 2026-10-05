@@ -15,33 +15,70 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 DOMAIN_NAME = "https://eportal-fza.ae"
 
+def _redact_rect(page, rect, pad=6):
+    page.add_redact_annot(
+        pymupdf.Rect(rect.x0 - pad, rect.y0 - pad, rect.x1 + pad, rect.y1 + pad),
+        fill=(1, 1, 1),
+    )
+
+
 def remove_existing_qr(page):
-    """يدوّر على أي QR في الجزء اليمين من الصفحة بس ويمسحه."""
-    zoom = 2
+    """يمسح أي باركود في الجزء اليمين-تحت من الصفحة (3 طبقات للكشف)."""
     r = page.rect
 
-    # الجزء اللي هيتفحص: من منتصف الصفحة لحد الحافة اليمين
-    clip = pymupdf.Rect(r.x0 + r.width * 0.5, r.y0, r.x1, r.y1)
+    # المنطقة المفحوصة: النص اليمين، من 55% من ارتفاع الصفحة لتحت
+    zone = pymupdf.Rect(r.x0 + r.width * 0.5, r.y0 + r.height * 0.55, r.x1, r.y1)
+    found_any = False
 
-    pix = page.get_pixmap(matrix=pymupdf.Matrix(zoom, zoom), clip=clip, alpha=False)
-    img = np.frombuffer(pix.samples, dtype=np.uint8).reshape(pix.height, pix.width, 3)
-    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-
+    # --- الطبقة 1: كشف QR بصرياً (بأكتر من تكبير) ---
     detector = cv2.QRCodeDetector()
-    found, points = detector.detectMulti(img)
-    if not found or points is None:
-        return
+    for zoom in (3, 4, 6):
+        pix = page.get_pixmap(matrix=pymupdf.Matrix(zoom, zoom), clip=zone, alpha=False)
+        img = np.frombuffer(pix.samples, dtype=np.uint8).reshape(pix.height, pix.width, 3)
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+        # نزوّد هامش أبيض حوالين الصورة عشان الكاشف يلقط الباركود اللي على الحافة
+        img = cv2.copyMakeBorder(img, 40, 40, 40, 40, cv2.BORDER_CONSTANT, value=(255, 255, 255))
 
-    for quad in points:
-        # نرجّع الإحداثيات لمكانها الأصلي في الصفحة (نضيف إزاحة الـ clip)
-        xs = quad[:, 0] / zoom + clip.x0
-        ys = quad[:, 1] / zoom + clip.y0
-        pad = 6
-        rect = pymupdf.Rect(xs.min() - pad, ys.min() - pad,
-                            xs.max() + pad, ys.max() + pad)
-        page.add_redact_annot(rect, fill=(1, 1, 1))
+        ok, points = detector.detectMulti(img)
+        if ok and points is not None:
+            for quad in points:
+                xs = (quad[:, 0] - 40) / zoom + zone.x0
+                ys = (quad[:, 1] - 40) / zoom + zone.y0
+                _redact_rect(page, pymupdf.Rect(xs.min(), ys.min(), xs.max(), ys.max()), pad=8)
+                found_any = True
+            break
 
-    page.apply_redactions(images=pymupdf.PDF_REDACT_IMAGE_PIXELS)
+    # --- الطبقة 2: لو الباركود صورة جوه الـ PDF ---
+    for info in page.get_image_info():
+        b = pymupdf.Rect(info["bbox"])
+        if not b.intersects(zone):
+            continue
+        w, h = b.width, b.height
+        # صورة شبه مربعة وحجمها منطقي لباركود (مش خلفية الصفحة)
+        if 25 < w < 160 and 25 < h < 160 and 0.8 < w / h < 1.25:
+            _redact_rect(page, b, pad=4)
+            found_any = True
+
+    # --- الطبقة 3: لو الباركود مرسوم كمربعات vector ---
+    if not found_any:
+        blocks = []
+        for d in page.get_drawings():
+            rc = d.get("rect")
+            if rc is None or not rc.intersects(zone):
+                continue
+            # مربعات سودا صغيرة (وحدات الباركود)
+            fill = d.get("fill")
+            if fill is not None and sum(fill) < 0.6 and rc.width < 12 and rc.height < 12:
+                blocks.append(rc)
+        if len(blocks) > 40:  # باركود فيه عشرات المربعات الصغيرة
+            united = pymupdf.Rect(blocks[0])
+            for rc in blocks[1:]:
+                united |= rc
+            _redact_rect(page, united, pad=6)
+            found_any = True
+
+    if found_any:
+        page.apply_redactions(images=pymupdf.PDF_REDACT_IMAGE_PIXELS)
 
 
 def add_qr_to_pdf(input_pdf_path, output_pdf_path, qr_data_url):
