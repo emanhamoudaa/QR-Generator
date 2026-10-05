@@ -161,17 +161,58 @@ iframe {
         </div>
     </div>
 
-    <!-- حاوية عرض الـ PDF الديناميكية -->
-    <div class="viewer-container">
-        <iframe src="/files/{{ doc_id }}#toolbar=1&navpanes=0&scrollbar=1"></iframe>
+    <!-- حاوية عرض الـ PDF -->
+    <div class="viewer-container" id="viewer">
+        <div id="msg">جاري تحميل الملف...</div>
+        <div id="pages"></div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script>
         function searchDoc() {
             const val = document.getElementById('docInput').value.trim();
             if (val) {
                 window.location.href = '/view/' + val;
             }
+        }
+
+        const url = "/files/" + {{ doc_id|tojson }};
+        const viewer = document.getElementById('viewer');
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+        if (!isMobile) {
+            // اللاب: عارض Chrome الجاهز
+            viewer.innerHTML = '<iframe src="' + url + '#toolbar=1&navpanes=0&scrollbar=1"></iframe>';
+        } else {
+            // الموبايل: نرسم الصفحات بـ PDF.js
+            pdfjsLib.GlobalWorkerOptions.workerSrc =
+                "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+            const msg = document.getElementById('msg');
+            const pagesBox = document.getElementById('pages');
+
+            pdfjsLib.getDocument(url).promise.then(async (pdf) => {
+                msg.remove();
+                const cssWidth = viewer.clientWidth - 20;
+                const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const base = page.getViewport({ scale: 1 });
+                    const viewport = page.getViewport({ scale: (cssWidth / base.width) * dpr });
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+                    canvas.style.width = cssWidth + 'px';
+                    canvas.style.height = 'auto';
+                    pagesBox.appendChild(canvas);
+
+                    await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+                }
+            }).catch(() => {
+                msg.innerHTML = 'تعذّر عرض الملف هنا. <a href="' + url + '" style="color:#8ab4f8">افتحيه من هنا</a>';
+            });
         }
     </script>
 
