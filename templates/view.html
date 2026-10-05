@@ -93,10 +93,10 @@
             background-color: #343a40;
         }
 
-        /* 4. شريط أدوات الـ PDF (معدل لمنع نزول of 2) */
+        /* 4. شريط أدوات الـ PDF */
         .pdf-toolbar {
             background-color: #323639;
-            color: #f1f3f4;
+            color: #ffffff;
             padding: 8px 12px;
             display: flex;
             align-items: center;
@@ -104,15 +104,15 @@
             font-size: 13px;
             border-bottom: 1px solid #202124;
             user-select: none;
-            overflow-x: auto; /* يسمح بالتمرير الأفقي إذا كانت الشاشة صغيرة جداً */
-            white-space: nowrap; /* يمنع أي عنصر من النزول لسطر جديد */
-            direction: ltr; /* يضمن الترتيب من اليسار لليمين دائماً */
+            overflow-x: auto;
+            white-space: nowrap;
+            direction: ltr;
         }
 
         .toolbar-group {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             flex-wrap: nowrap;
         }
 
@@ -123,60 +123,60 @@
             white-space: nowrap;
         }
 
+        /* تكبير الأسهم <> */
         .toolbar-btn {
             background: transparent;
             border: none;
-            color: #f1f3f4;
-            font-size: 16px;
+            color: #ffffff;
+            font-size: 20px; /* حجم أكبر للأزرار والأحرف */
+            font-weight: bold;
             cursor: pointer;
-            padding: 2px 6px;
-            border-radius: 2px;
+            padding: 2px 8px;
+            border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
+            line-height: 1;
         }
 
         .toolbar-btn:hover {
-            background-color: rgba(255, 255, 255, 0.1);
+            background-color: rgba(255, 255, 255, 0.15);
         }
 
+        /* مربع رقم الصفحة الأبيض ذو الحواف المنحنية */
         .page-num-input {
-            width: 32px;
+            width: 34px;
+            height: 26px;
             text-align: center;
-            background-color: #202124;
-            border: 1px solid #5f6368;
-            color: #ffffff;
-            border-radius: 2px;
-            padding: 2px 0;
-            font-size: 12px;
+            background-color: #ffffff; /* خلفية بيضاء بالكامل */
+            border: 1px solid #ffffff;
+            color: #000000; /* نص أسود */
+            border-radius: 4px; /* حواف مش sharp */
+            font-size: 13px;
+            font-weight: bold;
             outline: none;
         }
 
+        /* لون الكتابة الخاص بـ of 2 باللون الأبيض */
         .page-count-text {
-            color: #bdc1c6;
+            color: #ffffff;
             white-space: nowrap;
-            font-size: 12px;
+            font-size: 13px;
+            font-weight: 500;
         }
 
         .zoom-select {
             background-color: #202124;
             color: #ffffff;
             border: 1px solid #5f6368;
-            padding: 3px 6px;
-            border-radius: 2px;
+            padding: 4px 8px;
+            border-radius: 4px;
             font-size: 12px;
             outline: none;
             cursor: pointer;
         }
 
-        .toolbar-icon {
-            font-size: 14px;
-            opacity: 0.85;
-            cursor: pointer;
-            padding: 4px;
-        }
-
-        /* 5. منطقة عرض المستند */
+        /* 5. منطقة عرض المستند (مع مسافة جانبية لتبدأ بالتوازي مع الأزرار) */
         .viewer-container {
             flex: 1;
             width: 100%;
@@ -184,6 +184,25 @@
             position: relative;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
+            padding: 12px 16px; /* مسافة جانبية توازي بداية ونهاية الأزرار */
+        }
+
+        /* تخصيص الـ Slider ليكون باللون الأسود الداكن */
+        .viewer-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .viewer-container::-webkit-scrollbar-track {
+            background: #202124;
+        }
+
+        .viewer-container::-webkit-scrollbar-thumb {
+            background: #111111;
+            border-radius: 4px;
+        }
+
+        .viewer-container::-webkit-scrollbar-thumb:hover {
+            background: #000000;
         }
 
         iframe {
@@ -198,13 +217,15 @@
             flex-direction: column;
             align-items: center;
             gap: 15px;
-            padding: 20px 10px;
+            width: 100%;
         }
 
         #pages canvas {
             background: #fff;
+            width: 100%;
             max-width: 100%;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            border-radius: 2px;
         }
 
         #msg {
@@ -235,13 +256,12 @@
         </div>
     </div>
 
-    <!-- 3. شريط الـ PDF المعدل -->
+    <!-- 3. شريط الـ PDF -->
     <div class="pdf-toolbar">
         <div class="toolbar-group">
             <button class="toolbar-btn" title="Previous Page">‹</button>
             <button class="toolbar-btn" title="Next Page">›</button>
             
-            <!-- تجمِيع الـ input مع الكلمة للثبات بنفس السطر -->
             <div class="page-control-box">
                 <input type="text" class="page-num-input" value="1">
                 <span class="page-count-text">of <span id="totalPagesCount">2</span></span>
@@ -261,7 +281,7 @@
         </div>
     </div>
 
-    <!-- 4. حاوية عرض الـ PDF -->
+    <!-- 4. حاوية عرض الـ PDF (مع المسافات الجانبية المطابقة) -->
     <div class="viewer-container" id="viewer">
         <div id="msg">جاري تحميل الملف...</div>
         <div id="pages"></div>
@@ -292,7 +312,7 @@
             pdfjsLib.getDocument(url).promise.then(async (pdf) => {
                 msg.remove();
                 document.getElementById('totalPagesCount').textContent = pdf.numPages;
-                const cssWidth = viewer.clientWidth - 20;
+                const cssWidth = viewer.clientWidth - 32; /* مسافة داخلية متناسقة */
                 const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
                 for (let i = 1; i <= pdf.numPages; i++) {
