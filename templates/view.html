@@ -90,7 +90,7 @@
             background-color: #343a40;
         }
 
-        /* 4. الحاوية الخارجية لإعطاء المسافة البيضاء الجانبية للـ PDF بنفس موازاة الأزرار */
+        /* 4. الحاوية المغلفة للـ PDF بمسافات جانبية متطابقة تماماً مع الأزرار فوق */
         .outer-pdf-wrapper {
             flex: 1;
             padding: 0 16px 16px 16px;
@@ -102,30 +102,29 @@
 
         /* 5. شريط أدوات عارض الـ PDF الداكن */
         .pdf-toolbar {
-    background-color: #323639;
-    color: #ffffff;
-    padding: 6px 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 13px;
-    border-bottom: 1px solid #202124;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    user-select: none;
-    direction: ltr;
-    flex-wrap: wrap; /* السطر ده بيخلي الأيقونات تنزل باحترافية لو الشاشة ضاقت أوي */
-    gap: 8px; /* مسافة منظمة بين العناصر ببعضها */
-}
+            background-color: #323639;
+            color: #ffffff;
+            padding: 6px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+            border-bottom: 1px solid #202124;
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+            user-select: none;
+            direction: ltr;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
 
-.toolbar-group {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    white-space: nowrap;
-    flex-wrap: wrap; /* عشان المجموعات تتكيف مع الشاشات الصغيرة برضه */
-}
-    
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            flex-wrap: wrap;
+        }
 
         .toolbar-btn {
             background: transparent;
@@ -256,8 +255,10 @@
         </div>
     </div>
 
-    <!-- 3. الحاوية المغلفة للـ PDF -->
-    <!-- شريط أدوات الـ PDF الرمادي المترتب تماماً حسب طلبك -->
+    <!-- 3. الحاوية المغلفة للـ PDF (بالمسافات الجانبية المتطابقة) -->
+    <div class="outer-pdf-wrapper">
+        
+        <!-- شريط أدوات الـ PDF الرمادي -->
         <div class="pdf-toolbar">
             <div class="toolbar-group">
                 <button class="toolbar-btn" title="Previous Page"><iconify-icon icon="mdi:chevron-left"></iconify-icon></button>
@@ -289,45 +290,6 @@
                 <a href="/files/{{ doc_id }}" download class="toolbar-btn" title="Print" style="color: #fff; text-decoration: none; display: flex; align-items: center;"><iconify-icon icon="mdi:printer-outline"></iconify-icon></a>
                 <a href="/files/{{ doc_id }}" download class="toolbar-btn" title="Download" style="color: #fff; text-decoration: none; display: flex; align-items: center;"><iconify-icon icon="mdi:download-outline"></iconify-icon></a>
                 <button class="toolbar-btn" title="Bookmarks"><iconify-icon icon="mdi:bookmark-outline"></iconify-icon></button>
-            </div>
-        </div>
-
-            <div class="toolbar-group">
-                <a href="/files/{{ doc_id }}" download class="toolbar-btn" title="Print" style="color: #fff; text-decoration: none;"><iconify-icon icon="mdi:printer-outline"></iconify-icon></a>
-                <a href="/files/{{ doc_id }}" download class="toolbar-btn" title="Download"><iconify-icon icon="mdi:download-outline"></iconify-icon></a>
-                <button class="toolbar-btn" title="Bookmarks"><iconify-icon icon="mdi:bookmark-outline"></iconify-icon></button>
-            </div>
-        </div>
-
-            <!-- المجموعة الوسطى -->
-            <div class="toolbar-group">
-                <select class="zoom-select">
-                    <option>Automatic Zoom</option>
-                    <option>Actual Size</option>
-                    <option>Page Fit</option>
-                    <option>50%</option>
-                    <option>75%</option>
-                    <option>100%</option>
-                </select>
-                <div class="toolbar-separator"></div>
-                <button class="toolbar-btn" title="Zoom In"><iconify-icon icon="mdi:plus"></iconify-icon></button>
-                <button class="toolbar-btn" title="Zoom Out"><iconify-icon icon="mdi:minus"></iconify-icon></button>
-                <div class="toolbar-separator"></div>
-                
-                <div class="page-control-box">
-                    <span class="page-count-text">of <span id="totalPagesCount">1</span></span>
-                    <input type="text" class="page-num-input" value="1">
-                </div>
-            </div>
-
-            <!-- المجموعة اليمنى -->
-            <div class="toolbar-group">
-                <div class="toolbar-separator"></div>
-                <button class="toolbar-btn" title="Rotate Left"><iconify-icon icon="mdi:rotate-left"></iconify-icon></button>
-                <button class="toolbar-btn" title="Rotate Right"><iconify-icon icon="mdi:rotate-right"></iconify-icon></button>
-                <button class="toolbar-btn" title="Search"><iconify-icon icon="mdi:magnify"></iconify-icon></button>
-                <div class="toolbar-separator"></div>
-                <button class="toolbar-btn" title="Sidebar/Outline"><iconify-icon icon="mdi:page-layout-sidebar-left"></iconify-icon></button>
             </div>
         </div>
 
