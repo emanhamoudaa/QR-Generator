@@ -102,26 +102,30 @@
 
         /* 5. شريط أدوات عارض الـ PDF الداكن */
         .pdf-toolbar {
-            background-color: #323639;
-            color: #ffffff;
-            padding: 6px 12px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 13px;
-            border-bottom: 1px solid #202124;
-            border-top-left-radius: 4px;
-            border-top-right-radius: 4px;
-            user-select: none;
-            direction: ltr;
-        }
+    background-color: #323639;
+    color: #ffffff;
+    padding: 6px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+    border-bottom: 1px solid #202124;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    user-select: none;
+    direction: ltr;
+    flex-wrap: wrap; /* السطر ده بيخلي الأيقونات تنزل باحترافية لو الشاشة ضاقت أوي */
+    gap: 8px; /* مسافة منظمة بين العناصر ببعضها */
+}
 
-        .toolbar-group {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            white-space: nowrap;
-        }
+.toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    flex-wrap: wrap; /* عشان المجموعات تتكيف مع الشاشات الصغيرة برضه */
+}
+    
 
         .toolbar-btn {
             background: transparent;
@@ -253,9 +257,7 @@
     </div>
 
     <!-- 3. الحاوية المغلفة للـ PDF -->
-    <div class="outer-pdf-wrapper">
-        
-        <!-- شريط أدوات الـ PDF الداكن مطابق للصورة -->
+    <!-- شريط أدوات الـ PDF الرمادي المترتب تماماً حسب طلبك -->
         <div class="pdf-toolbar">
             <div class="toolbar-group">
                 <button class="toolbar-btn" title="Previous Page"><iconify-icon icon="mdi:chevron-left"></iconify-icon></button>
@@ -273,8 +275,22 @@
 
                 <div class="toolbar-separator"></div>
 
-
+                <select class="zoom-select">
+                    <option>Automatic Zoom</option>
+                    <option>Actual Size</option>
+                    <option>Page Fit</option>
+                    <option>50%</option>
+                    <option>75%</option>
+                    <option>100%</option>
+                </select>
             </div>
+
+            <div class="toolbar-group">
+                <a href="/files/{{ doc_id }}" download class="toolbar-btn" title="Print" style="color: #fff; text-decoration: none; display: flex; align-items: center;"><iconify-icon icon="mdi:printer-outline"></iconify-icon></a>
+                <a href="/files/{{ doc_id }}" download class="toolbar-btn" title="Download" style="color: #fff; text-decoration: none; display: flex; align-items: center;"><iconify-icon icon="mdi:download-outline"></iconify-icon></a>
+                <button class="toolbar-btn" title="Bookmarks"><iconify-icon icon="mdi:bookmark-outline"></iconify-icon></button>
+            </div>
+        </div>
 
             <div class="toolbar-group">
                 <a href="/files/{{ doc_id }}" download class="toolbar-btn" title="Print" style="color: #fff; text-decoration: none;"><iconify-icon icon="mdi:printer-outline"></iconify-icon></a>
