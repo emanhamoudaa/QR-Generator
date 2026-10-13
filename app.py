@@ -172,8 +172,10 @@ def upload_file():
 
 @app.route('/view/<filename>')
 def view_pdf(filename):
-    return "💥 تم تعديل ملف الـ Python الرئيسي بنجاح تام للمستند: " + filename
-
+    if not filename.lower().endswith('.pdf') or not storage_exists(filename):
+        abort(404)
+    return render_template('view.html', doc_id=filename)
+    
 @app.route('/files/<filename>')
 def raw_pdf(filename):
     data = storage_download(filename) if filename.lower().endswith('.pdf') else None
