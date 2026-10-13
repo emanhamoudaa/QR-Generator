@@ -182,10 +182,26 @@
             cursor: pointer;
         }
 
-        /* إخفاء الأيقونات الجانبية على الشاشات الصغيرة (الموبايل) لتفادي النزول لسطر جديد */
+        /* تعديل خاص بالموبايل فقط لتقليل المسافات تلقائياً بحيث يظل كل شيء داخله بدون إخفاء أي عنصر وبدون تغيير تصميم اللاب */
         @media screen and (max-width: 650px) {
-            .hide-on-mobile {
-                display: none !important;
+            .pdf-toolbar {
+                padding: 4px 6px;
+                gap: 2px;
+            }
+            .toolbar-group {
+                gap: 3px;
+            }
+            .toolbar-separator {
+                margin: 0 2px;
+            }
+            .zoom-select {
+                max-width: 105px; /* تصغير عرض القائمة قليلاً بالموبايل لتدخل تماماً جوه الشريط */
+                padding: 2px 4px;
+                font-size: 11px;
+            }
+            .toolbar-btn {
+                font-size: 16px;
+                padding: 2px 4px;
             }
         }
 
@@ -290,8 +306,7 @@
                 </select>
             </div>
 
-            <!-- أضفنا الكلاس hide-on-mobile هنا لتختفي على الموبايل وتفضل على اللاب توب فقط -->
-            <div class="toolbar-group hide-on-mobile">
+            <div class="toolbar-group">
                 <a href="/files/{{ doc_id }}" download class="toolbar-btn" title="Print" style="color: #fff; text-decoration: none; display: flex; align-items: center;"><iconify-icon icon="mdi:printer-outline"></iconify-icon></a>
                 <a href="/files/{{ doc_id }}" download class="toolbar-btn" title="Download" style="color: #fff; text-decoration: none; display: flex; align-items: center;"><iconify-icon icon="mdi:download-outline"></iconify-icon></a>
                 <button class="toolbar-btn" title="Bookmarks"><iconify-icon icon="mdi:bookmark-outline"></iconify-icon></button>
