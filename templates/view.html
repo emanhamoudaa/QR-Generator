@@ -255,16 +255,40 @@
     <!-- 3. الحاوية المغلفة للـ PDF -->
     <div class="outer-pdf-wrapper">
         
-        <!-- شريط أدوات الـ PDF الداكن -->
+        <!-- شريط أدوات الـ PDF الداكن مطابق للصورة -->
         <div class="pdf-toolbar">
-            <!-- المجموعة اليسرى -->
             <div class="toolbar-group">
-                <button class="toolbar-btn" title="Menu"><iconify-icon icon="mdi:menu"></iconify-icon></button>
-                <button class="toolbar-btn" title="Bookmarks"><iconify-icon icon="mdi:bookmark-outline"></iconify-icon></button>
-                <button class="toolbar-btn" title="Download"><iconify-icon icon="mdi:download-outline"></iconify-icon></button>
-                <button class="toolbar-btn" title="Print"><iconify-icon icon="mdi:printer-outline"></iconify-icon></button>
+                <button class="toolbar-btn" title="Previous Page"><iconify-icon icon="mdi:chevron-left"></iconify-icon></button>
+                <button class="toolbar-btn" title="Next Page"><iconify-icon icon="mdi:chevron-right"></iconify-icon></button>
+                
+                <div class="page-control-box">
+                    <input type="text" class="page-num-input" value="1">
+                    <span class="page-count-text">of <span id="totalPagesCount">1</span></span>
+                </div>
+
                 <div class="toolbar-separator"></div>
+
+                <button class="toolbar-btn" title="Zoom Out"><iconify-icon icon="mdi:minus"></iconify-icon></button>
+                <button class="toolbar-btn" title="Zoom In"><iconify-icon icon="mdi:plus"></iconify-icon></button>
+
+                <div class="toolbar-separator"></div>
+
+                <select class="zoom-select">
+                    <option>Automatic Zoom</option>
+                    <option>Actual Size</option>
+                    <option>Page Fit</option>
+                    <option>50%</option>
+                    <option>75%</option>
+                    <option>100%</option>
+                </select>
             </div>
+
+            <div class="toolbar-group">
+                <a href="/files/{{ doc_id }}" download class="toolbar-btn" title="Print" style="color: #fff; text-decoration: none;"><iconify-icon icon="mdi:printer-outline"></iconify-icon></a>
+                <a href="/files/{{ doc_id }}" download class="toolbar-btn" title="Download"><iconify-icon icon="mdi:download-outline"></iconify-icon></a>
+                <button class="toolbar-btn" title="Bookmarks"><iconify-icon icon="mdi:bookmark-outline"></iconify-icon></button>
+            </div>
+        </div>
 
             <!-- المجموعة الوسطى -->
             <div class="toolbar-group">
