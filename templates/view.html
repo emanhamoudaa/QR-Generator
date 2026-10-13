@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>معاينة المستند | Verify Document</title>
-    <!-- استدعاء مكتبة PDF.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -21,124 +19,60 @@
             height: 100vh;
             overflow: hidden;
         }
-        /* شريط الأدوات العلوي المخصص */
-        .pdf-toolbar {
+        /* الشريط العلوي الخاص بكِ (البحث والتحميل والتصميم القديم) */
+        .top-bar {
             background-color: #1e1e1e;
             border-bottom: 1px solid #333;
-            padding: 10px 20px;
+            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            z-index: 100;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            z-index: 10;
         }
-        .toolbar-group {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+        .doc-title {
+            font-size: 16px;
+            color: #ddd;
         }
-        .btn {
+        .btn-download {
             background-color: #2a2a2a;
-            color: #e0e0e0;
-            border: 1px solid #444;
-            padding: 6px 14px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .btn:hover {
-            background-color: #3a3a3a;
             color: #fff;
-            border-color: #666;
-        }
-        .page-info {
+            border: 1px solid #444;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
             font-size: 14px;
-            color: #aaa;
+            transition: background 0.2s;
         }
-        /* منطقة عرض الصفحات */
-        #pdf-container {
+        .btn-download:hover {
+            background-color: #3a3a3a;
+        }
+        /* حاوية عرض الـ PDF بنفس التصميم القديم بدون أشرطة مزعجة */
+        .pdf-viewer-container {
             flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            background-color: #121212;
+            width: 100%;
+            background-color: #1a1a1a;
         }
-        canvas {
-            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
-            border-radius: 4px;
-            max-width: 100%;
-            height: auto !important;
-        }
-        .loading {
-            margin-top: 50px;
-            font-size: 18px;
-            color: #888;
+        iframe, embed {
+            width: 100%;
+            height: 100%;
+            border: none;
         }
     </style>
 </head>
 <body>
 
-    <!-- شريط التحكم الداكن المخصص -->
-    <div class="pdf-toolbar">
-        <div class="toolbar-group">
-            <span class="page-info">الصفحة <span id="current-page">1</span> من <span id="total-pages">-</span></span>
-        </div>
-        <div class="toolbar-group">
-            <a href="/files/{{ doc_id }}" download class="btn">
-                📥 تحميل المستند
-            </a>
+    <!-- الشريط العلوي الخاص بموقعك -->
+    <div class="top-bar">
+        <div class="doc-title">رقم المستند: {{ doc_id }}</div>
+        <div>
+            <a href="/files/{{ doc_id }}" download class="btn-download">📥 تحميل المستند</a>
         </div>
     </div>
 
-    <!-- الحاوية التي سيتم رسم صفحات الـ PDF فيها -->
-    <div id="pdf-container">
-        <div id="loading-text" class="loading">جاري تحميل المستند...</div>
+    <!-- نافذة عرض الـ PDF مع إخفاء أشرطة المتصفح الإضافية باستخدام #toolbar=0 -->
+    <div class="pdf-viewer-container">
+        <embed src="/files/{{ doc_id }}#toolbar=0&navpanes=0&scrollbar=0" type="application/pdf" width="100%" height="100%">
     </div>
 
-    <script>
-        // إعداد رابط المكتبة
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
-        const pdfUrl = '/files/{{ doc_id }}';
-        const container = document.getElementById('pdf-container');
-        const loadingText = document.getElementById('loading-text');
-
-        // تحميل ملف الـ PDF ورسمه كصفحات
-        pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
-            loadingText.style.display = 'none';
-            document.getElementById('total-pages').textContent = pdf.numPages;
-
-            // رسم كل صفحة داخل Canvas
-            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-                pdf.getPage(pageNum).then(page => {
-                    const viewport = page.getViewport({ scale: 1.5 });
-                    const canvas = document.createElement('canvas');
-                    const context = canvas.getContext('2d');
-
-                    canvas.height = viewport.height;
-                    canvas.width = viewport.width;
-
-                    const renderContext = {
-                        canvasContext: context,
-                        viewport: viewport
-                    };
-
-                    container.appendChild(canvas);
-                    page.render(renderContext);
-                });
-            }
-        }).catch(error => {
-            loadingText.textContent = 'حدث خطأ أثناء تحميل المستند.';
-            console.error('Error loading PDF:', error);
-        });
-    </script>
 </body>
 </html>
