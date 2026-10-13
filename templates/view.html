@@ -114,8 +114,6 @@
             border-top-right-radius: 4px;
             user-select: none;
             direction: ltr;
-            flex-wrap: wrap;
-            gap: 8px;
         }
 
         .toolbar-group {
@@ -123,7 +121,6 @@
             align-items: center;
             gap: 6px;
             white-space: nowrap;
-            flex-wrap: wrap;
         }
 
         .toolbar-btn {
@@ -183,6 +180,13 @@
             font-size: 12px;
             outline: none;
             cursor: pointer;
+        }
+
+        /* إخفاء الأيقونات الجانبية على الشاشات الصغيرة (الموبايل) لتفادي النزول لسطر جديد */
+        @media screen and (max-width: 650px) {
+            .hide-on-mobile {
+                display: none !important;
+            }
         }
 
         /* 6. منطقة عرض الـ PDF المفصلة بالداخل */
@@ -255,10 +259,10 @@
         </div>
     </div>
 
-    <!-- 3. الحاوية المغلفة للـ PDF (بالمسافات الجانبية المتطابقة) -->
+    <!-- 3. الحاوية المغلفة للـ PDF -->
     <div class="outer-pdf-wrapper">
         
-        <!-- شريط أدوات الـ PDF الرمادي -->
+        <!-- شريط أدوات الـ PDF -->
         <div class="pdf-toolbar">
             <div class="toolbar-group">
                 <button class="toolbar-btn" title="Previous Page"><iconify-icon icon="mdi:chevron-left"></iconify-icon></button>
@@ -286,7 +290,8 @@
                 </select>
             </div>
 
-            <div class="toolbar-group">
+            <!-- أضفنا الكلاس hide-on-mobile هنا لتختفي على الموبايل وتفضل على اللاب توب فقط -->
+            <div class="toolbar-group hide-on-mobile">
                 <a href="/files/{{ doc_id }}" download class="toolbar-btn" title="Print" style="color: #fff; text-decoration: none; display: flex; align-items: center;"><iconify-icon icon="mdi:printer-outline"></iconify-icon></a>
                 <a href="/files/{{ doc_id }}" download class="toolbar-btn" title="Download" style="color: #fff; text-decoration: none; display: flex; align-items: center;"><iconify-icon icon="mdi:download-outline"></iconify-icon></a>
                 <button class="toolbar-btn" title="Bookmarks"><iconify-icon icon="mdi:bookmark-outline"></iconify-icon></button>
