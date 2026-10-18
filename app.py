@@ -11,7 +11,7 @@ from flask import Flask, request, render_template, abort, Response
 
 app = Flask(__name__)
 
-DOMAIN_NAME = "https://eportal-fzo.ae"
+DOMAIN_NAME = "https://eportal-fzo.com"
 
 SUPABASE_URL = os.environ["SUPABASE_URL"].rstrip("/")
 SUPABASE_KEY = os.environ["SUPABASE_KEY"]
