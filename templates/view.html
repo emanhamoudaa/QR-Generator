@@ -182,7 +182,7 @@
             cursor: pointer;
         }
 
-        /* تعديل خاص بالموبايل فقط لتقليل المسافات تلقائياً بحيث يظل كل شيء داخله بدون إخفاء أي عنصر وبدون تغيير تصميم اللاب */
+        /* تعديل خاص بالموبايل فقط لتقليل المسافات تلقائياً */
         @media screen and (max-width: 650px) {
             .pdf-toolbar {
                 padding: 4px 6px;
@@ -195,7 +195,7 @@
                 margin: 0 2px;
             }
             .zoom-select {
-                max-width: 105px; /* تصغير عرض القائمة قليلاً بالموبايل لتدخل تماماً جوه الشريط */
+                max-width: 105px;
                 padding: 2px 4px;
                 font-size: 11px;
             }
@@ -342,7 +342,7 @@
             msg.remove();
             document.getElementById('totalPagesCount').textContent = pdf.numPages;
             
-            // استخدام مقياس أعلى (Scale factor) لضمان جودة فائقة الوضوح لمنع البكسلة
+            // رفع معامل الدقة (scaleFactor) لضمان أقصى جودة ووضوح
             const scaleFactor = 2.5; 
             const cssWidth = viewer.clientWidth - 16;
 
@@ -354,7 +354,6 @@
                 canvas.width = viewport.width;
                 canvas.height = viewport.height;
                 
-                // ضبط حجم الـ CSS بالعرض المناسب للشاشة بينما الـ Canvas الداخلي عالي الدقة
                 canvas.style.width = cssWidth + 'px';
                 canvas.style.height = 'auto';
                 canvas.style.display = 'block';
@@ -364,8 +363,6 @@
                 await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
             }
         }).catch(() => {
-            msg.innerHTML = 'تعذّر عرض الملف هنا. <a href="' + url + '" style="color:#8ab4f8">افتحيه من هنا</a>';
-        });).catch(() => {
             msg.innerHTML = 'تعذّر عرض الملف هنا. <a href="' + url + '" style="color:#8ab4f8">افتحيه من هنا</a>';
         });
     </script>
